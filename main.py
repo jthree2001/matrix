@@ -12,18 +12,25 @@ from multiprocessing.pool import ThreadPool
 import numpy
 import sys
 
-
-def newthread(part1, part2, A, B, C):
-    for x in range(part1, part2):
-        for y in range(m):
-            for z in range(m):
-                C[x][y] += A[x][z] *B[z][y]
+#[[randint[0,9] for _ in xrange(10)] for __ in xrange(1)]
+class newthread:
+    def __init__(self, A, B, C, m):
+        self.A = A
+        self.B = B
+        self.C = C
+        self.m = m
+    def calculate(self, part1, part2):
+        for x in range(part1, part2):
+            for y in range(self.m):
+                for z in range(self.m):
+                    C[x][y] += A[x][z] *B[z][y]
+        return C
     '''
     print (part1)
     print (part2)
     print (range(part1, part2))
     '''
-    return C
+
 
 
 m = int(sys.argv[1])
@@ -35,10 +42,9 @@ if not(m>n):
 
 if not((m%n)==0):
     exit("Treads don't divide into matrices evenly")
-
-A = numpy.random.randint(10, size=(m,m))
-B = numpy.random.randint(10, size=(m,m))
-C = numpy.zeros((m,m))
+A = numpy.ctypeslib.array(numpy.random.randint(10, size=(m,m)))
+B = numpy.ctypeslib.array(numpy.random.randint(10, size=(m,m)))
+C = numpy.ctypeslib.array(numpy.zeros((m,m)))
 '''
 A = numpy.zeros((m,m))
 B = numpy.zeros((m,m))
@@ -53,16 +59,13 @@ for x in range(m):
 thread = []
 f3=open('C.txt', 'w+')
 w = 0
+a = newthread(A, B, C, m)
 while w < n:
     thread.append([])
-    thread[w] = pool.apply_async(newthread, args=((w*m)/n, (((w+1)*m)/n), A, B, C))
+    thread[w] = pool.apply_async(a.calculate, args=(((w*m)/n), (((w+1)*m)/n)))
     #thread[x].start()
     #print (x)
     w = w + 1
-    print (w)
-    print (n)
-    print (m)
-
 for x in range(n):
     C = thread[x].get()
 '''
